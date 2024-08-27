@@ -9,6 +9,6 @@ void main() {
       colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepOrange),
       useMaterial3: true,
     ),
-    home: const Home(),
+    home: Home(),
   ));
 }
