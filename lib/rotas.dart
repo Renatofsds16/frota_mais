@@ -14,6 +14,8 @@ class Rotas{
         return MaterialPageRoute(builder: (_)=> Login());
       case '/cadastro':
         return MaterialPageRoute(builder: (_)=> const Cadastro());
+      case '/home':
+        return MaterialPageRoute(builder: (_)=> const Home());
 
       default:
         return MaterialPageRoute(builder: (_)=> const Home());

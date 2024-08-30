@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../help_firebase/help_firebase_firestore.dart';
 import '../models/usuario.dart';
 
 class Cadastro extends StatefulWidget {
@@ -12,7 +13,8 @@ class Cadastro extends StatefulWidget {
 }
 
 class _CadastroState extends State<Cadastro> {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final HelpFirebaseFirestore _db = HelpFirebaseFirestore();
+  User? _user;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _controllerNome = TextEditingController(text:'Renato');
   final TextEditingController _controllerEmail = TextEditingController(text: 'renatofss16@gmail.com');
@@ -25,7 +27,7 @@ class _CadastroState extends State<Cadastro> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Cadastro',style: TextStyle(color: Colors.white),),
-        backgroundColor: Colors.grey,
+        backgroundColor: Colors.deepOrange,
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -118,6 +120,8 @@ class _CadastroState extends State<Cadastro> {
           usuario.email = email;
           usuario. password = password;
           _cadastraUsuario(usuario);
+
+
         }else{
           setState(() {
             _mensagemError = 'sua senha deve conter pelo menos 6 caractere';
@@ -141,15 +145,18 @@ class _CadastroState extends State<Cadastro> {
         email: usuario.email,
         password: usuario.password
     ).then((firebaseUser){
-      String? id = firebaseUser.user?.uid;
+      _user = firebaseUser.user;
+      String? id = _user?.uid;
       if(id != null){
         usuario.id = id;
       }
-
-      _db.collection('usuarios')
-          .doc(firebaseUser.user?.uid)
-          .set(usuario.toMap());
-
+      _db.collectionUser(usuario);
+      _verificarUsuarioLogado(context);
     });
     }
+  _verificarUsuarioLogado(BuildContext context)async{
+    if(_user != null){
+      Navigator.pushNamedAndRemoveUntil(context, '/home',(context) =>false);
+    }
+  }
 }
