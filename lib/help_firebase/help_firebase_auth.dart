@@ -4,6 +4,9 @@ import 'package:flutter/cupertino.dart';
 import '../models/usuario.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../rotas.dart';
+import 'help_firebase_firestore.dart';
+
 class HelpFirebaseAuth{
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _db = FirebaseFirestore.instance;
@@ -35,9 +38,20 @@ class HelpFirebaseAuth{
   loginUser(BuildContext context,Usuario usuario)async{
     _auth.signInWithEmailAndPassword(
         email: usuario.email, password: usuario.password
-    ).then((firebaseUser){
-      if(firebaseUser.user != null){
-        Navigator.pushReplacementNamed(context, '/home');
+    ).then((firebaseUser) async {
+      DocumentSnapshot snapshot = await _db.collection('user').doc(firebaseUser.user?.uid).get();
+      String? typeUser = snapshot.get('tipo');
+      switch (typeUser){
+        case 'empregador':
+          Navigator.pushReplacementNamed(context, Rotas.homeEmpregador);
+          return;
+        case 'funcionario':
+          Navigator.pushReplacementNamed(context, Rotas.homeFuncionario);
+          return;
+        case 'procurando_emprego':
+          Navigator.pushReplacementNamed(context, Rotas.homeFilaEspera);
+          return;
+
       }
     }).catchError((e){
       print('***************o erro foi $e ****************************');

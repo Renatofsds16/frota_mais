@@ -1,54 +1,70 @@
 import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:frota_mais/models/empregador.dart';
+import 'package:frota_mais/models/usuario.dart';
+import 'package:frota_mais/widgets/show_list.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter/material.dart';
 import 'package:frota_mais/help_firebase/help_firebase_auth.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class HomeEmpregador extends StatefulWidget {
+  Map<String, dynamic> user;
+  HomeEmpregador({super.key, required this.user});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<HomeEmpregador> createState() => _HomeEmpregadorState();
 }
 
-class _HomeState extends State<Home> {
-  CameraPosition _cameraPosition = const CameraPosition(target: LatLng(0,0));
+class _HomeEmpregadorState extends State<HomeEmpregador> {
+  final FirebaseAuth _user = FirebaseAuth.instance;
+  String? _owner = 'owner';
+  String? _idUsuario;
+  List<Usuario> _listFuncionaio = [];
+  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  Empregador? _empregador;
+  Usuario? _usuario;
+
   final HelpFirebaseAuth _auth = HelpFirebaseAuth();
-  final List<String> _options = ['Manutencao', 'Sair'];
-  final Completer<GoogleMapController> _completer =
-      Completer<GoogleMapController>();
+  final List<String> _options = ['Manutencao', 'Sair', 'novo motorista'];
 
   @override
   void initState() {
+    _verificarTipoUsuario();
     _requestPemision();
-    _addLocationListner();
     super.initState();
   }
 
-  _addLocationListner() async {
-    LocationSettings locationSettings = const LocationSettings(
-        accuracy: LocationAccuracy.high, distanceFilter: 10);
-    Geolocator.getPositionStream(locationSettings: locationSettings)
-        .listen((
-        Position position) {
-      _cameraPosition = CameraPosition(
-          target: LatLng(position.latitude,position.longitude),zoom: 18);
-      _movimentarCamera(_cameraPosition);
-        }
-    );
+  _verificarTipoUsuario() async {
+    _usuario = widget.user['user'];
+    if (_usuario != null && _usuario?.tipo == 'empregador') {
+      _idUsuario = _usuario?.id;
+      _empregador = Empregador(usuario: _usuario);
+    } else {
+      User? user = _user.currentUser;
+      _idUsuario = user?.uid;
+    }
   }
 
-  _movimentarCamera(CameraPosition cameraPosition) async {
-    GoogleMapController googleMapController = await _completer.future;
-    googleMapController
-        .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+  Future<List<Usuario>> _recuperarListaFuncionaio() async {
+
+    List<Usuario> lista = [];
+      Query<Map<String, dynamic>> query =
+      _db.collection('user').where('owner', isEqualTo: _idUsuario);
+      QuerySnapshot querySnapshot = await query.get();
+      for (DocumentSnapshot item in querySnapshot.docs) {
+        Usuario usuario = Usuario.fromMap(item);
+        lista.add(usuario);
+      }
+    return lista;
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Home'),
+        title: const Text('Seus Funcionarios'),
         backgroundColor: Colors.deepOrange,
         actions: [
           PopupMenuButton<String>(
@@ -63,20 +79,49 @@ class _HomeState extends State<Home> {
               }),
         ],
       ),
-      body: Container(
-        child: GoogleMap(
-          myLocationEnabled: true,
-          mapType: MapType.normal,
-          initialCameraPosition: _cameraPosition,
-          onMapCreated: _onMapCreate,
+      body: ShowList(future: _recuperarListaFuncionaio, idUsuarioLogado: _idUsuario,),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.deepOrange,
+        onPressed: _showAlertDialog,
+        child: const Icon(
+          Icons.add,
+          color: Colors.white,
         ),
       ),
     );
   }
 
+  _showAlertDialog() {
+    showDialog(
+        context: context,
+        builder: (context) {
+          return AlertDialog(
+            title: const Text('Selecionar novo colaborador'),
+            content: const Text('Um ja existem ou novo?'),
+            actions: [
+              Row(
+                children: [
+                  TextButton(onPressed: () {
+                    Navigator.pop(context);
+
+                  }, child: const Text('cancelar')),
+
+                  TextButton(onPressed: () {
+                    Navigator.pushNamed(context,'/home_fila_espera');
+                  }, child: const Text('Ja existente')),
+
+                ],
+              )
+            ],
+          );
+        });
+  }
+
   _selectUser(String value) async {
     switch (value) {
       case 'Manutencao':
+        break;
+      case 'novo motorista':
         break;
       case 'Sair':
         _logofUser();
@@ -87,10 +132,6 @@ class _HomeState extends State<Home> {
   _logofUser() async {
     await _auth.signOut();
     Navigator.pushReplacementNamed(context, '/');
-  }
-
-  _onMapCreate(GoogleMapController controller) {
-    _completer.complete(controller);
   }
 
   _requestPemision() async {
