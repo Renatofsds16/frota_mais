@@ -1,6 +1,8 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
+import '../rotas.dart';
+
 class HomeFuncionario extends StatefulWidget {
   const HomeFuncionario({super.key});
 
@@ -9,6 +11,7 @@ class HomeFuncionario extends StatefulWidget {
 }
 
 class _HomeFuncionarioState extends State<HomeFuncionario> {
+  final TextEditingController _controllerCodigo = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final List<String> _options = ['Manutencao', 'Sair'];
   @override
@@ -30,8 +33,8 @@ class _HomeFuncionarioState extends State<HomeFuncionario> {
               }),
         ],
       ),
-      body:const Center(
-        child: Text('funcionario'),
+      body: const Center(
+        child: Text('1'),
       ),
     );
   }
@@ -45,6 +48,8 @@ class _HomeFuncionarioState extends State<HomeFuncionario> {
     }
   }
   _exit()async{
+    final navigator = Navigator.of(context);
     await _auth.signOut();
+    navigator.pushNamedAndRemoveUntil(Rotas.login, (context)=>false);
   }
 }

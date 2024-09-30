@@ -9,9 +9,10 @@ class Usuario{
   String? _regiao;
   String? _rota;
   String? _foto;
+  String? _cnpj;
 
-  int? _latitude;
-  int? _longitude;
+  double _latitude = 0;
+  double _longitude = 0;
   late String _email;
   late String _password;
   String? _tipo;
@@ -20,6 +21,7 @@ class Usuario{
   Usuario.login({required email,required password});
   Usuario.fromMap(DocumentSnapshot<Object?> documentSnapshot){
     nome = documentSnapshot.get('nome');
+    cnpj = documentSnapshot.get('cnpj');
     email = documentSnapshot.get('email');
     id = documentSnapshot.get('id');
     tipo = documentSnapshot.get('tipo');
@@ -30,6 +32,7 @@ class Usuario{
     Map<String,dynamic> map = {};
     map['id'] = id;
     map['nome'] = nome;
+    map['cnpj'] = cnpj;
     map['email'] = email;
     map['tipo'] = tipo;
     map['owner'] = owner;
@@ -66,9 +69,9 @@ class Usuario{
     _nome = value;
   }
 
-  int? get latitude => _latitude;
+  double get latitude => _latitude;
 
-  set latitude(int? value) {
+  set latitude(double value) {
     _latitude = value;
   }
 
@@ -78,9 +81,9 @@ class Usuario{
     _id = value;
   }
 
-  int? get longitude => _longitude;
+  double get longitude => _longitude;
 
-  set longitude(int? value) {
+  set longitude(double value) {
     _longitude = value;
   }
 
@@ -112,5 +115,11 @@ class Usuario{
 
   set foto(String? value) {
     _foto = value;
+  }
+
+  String? get cnpj => _cnpj;
+
+  set cnpj(String? value) {
+    _cnpj = value;
   }
 }

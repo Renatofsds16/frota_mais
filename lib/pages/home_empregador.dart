@@ -19,11 +19,8 @@ class HomeEmpregador extends StatefulWidget {
 
 class _HomeEmpregadorState extends State<HomeEmpregador> {
   final FirebaseAuth _user = FirebaseAuth.instance;
-  String? _owner = 'owner';
   String? _idUsuario;
-  List<Usuario> _listFuncionaio = [];
   final FirebaseFirestore _db = FirebaseFirestore.instance;
-  Empregador? _empregador;
   Usuario? _usuario;
 
   final HelpFirebaseAuth _auth = HelpFirebaseAuth();
@@ -40,7 +37,6 @@ class _HomeEmpregadorState extends State<HomeEmpregador> {
     _usuario = widget.user['user'];
     if (_usuario != null && _usuario?.tipo == 'empregador') {
       _idUsuario = _usuario?.id;
-      _empregador = Empregador(usuario: _usuario);
     } else {
       User? user = _user.currentUser;
       _idUsuario = user?.uid;

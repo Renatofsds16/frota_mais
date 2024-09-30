@@ -42,7 +42,7 @@ class Rotas{
       case novoColaborador:
         return MaterialPageRoute(builder: (_)=> NovoColaborador(usuario: {'user':args},));
       case details:
-        return MaterialPageRoute(builder: (_)=> Details(usuario: {'user':args},));
+        return MaterialPageRoute(builder: (_)=> Details(args: {'args':args},));
 
       default:
         return MaterialPageRoute(builder: (_)=> _erroView());

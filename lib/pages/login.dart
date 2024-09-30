@@ -128,7 +128,7 @@ class _LoginState extends State<Login> {
   }
 
   loginUser(Usuario usuario)async{
-    
+    final navigator = Navigator.of(context);
       _auth.signInWithEmailAndPassword(
           email: usuario.email, password: usuario.password
       ).then((firebaseUser)async{
@@ -139,13 +139,13 @@ class _LoginState extends State<Login> {
         if(typeUser != null){
           switch (typeUser){
             case 'empregador':
-              Navigator.pushReplacementNamed(context, Rotas.homeEmpregador);
+              navigator.pushNamedAndRemoveUntil(Rotas.homeEmpregador, (context)=>false);
               return;
             case 'funcionario':
-              Navigator.pushReplacementNamed(context, Rotas.homeFuncionario);
+              navigator.pushNamedAndRemoveUntil(Rotas.localFuncionario,arguments: usuario,(context)=>false);
               return;
             case 'procurando_emprego':
-              Navigator.pushReplacementNamed(context, Rotas.homeFilaEspera);
+              navigator.pushNamedAndRemoveUntil(Rotas.homeFilaEspera,(context)=>false);
               return;
 
           }

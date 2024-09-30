@@ -22,6 +22,8 @@ class _CadastroState extends State<Cadastro> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _controllerNome =
       TextEditingController(text: 'Renato');
+  final TextEditingController _controllerCnpj =
+    TextEditingController(text: '01234567890');
   final TextEditingController _controllerEmail =
       TextEditingController(text: 'renatofss16@gmail.com');
   final TextEditingController _controllerSenha =
@@ -56,6 +58,16 @@ class _CadastroState extends State<Cadastro> {
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: TextField(
+                  controller: _controllerCnpj,
+                  decoration: InputDecoration(
+                      hintText: 'Digite seu cnpj',
+                      border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(18))),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
+                child: TextField(
                   controller: _controllerEmail,
                   keyboardType: TextInputType.emailAddress,
                   decoration: InputDecoration(
@@ -75,6 +87,7 @@ class _CadastroState extends State<Cadastro> {
                           borderRadius: BorderRadius.circular(18))),
                 ),
               ),
+
               Padding(
                 padding: const EdgeInsets.fromLTRB(0, 8, 0, 8),
                 child: Column(
@@ -84,18 +97,6 @@ class _CadastroState extends State<Cadastro> {
                         subtitle: const Text(
                             'Selecione esta opção se você criar uma nova frota'),
                         value: _empregador,
-                        groupValue: _typeUser,
-                        onChanged: (String? value) {
-                          setState(() {
-                            _typeUser = value;
-                          });
-                          print(_typeUser);
-                        }),
-                    RadioListTile(
-                        title: const Text('Funcionario'),
-                        subtitle: const Text(
-                            'Selecione esta opção se você vai trabalhar em uma frota'),
-                        value: _funcionario,
                         groupValue: _typeUser,
                         onChanged: (String? value) {
                           setState(() {
@@ -145,6 +146,7 @@ class _CadastroState extends State<Cadastro> {
     String nome = _controllerNome.text;
     String email = _controllerEmail.text;
     String password = _controllerSenha.text;
+    String cnpj = _controllerCnpj.text;
 
     if (_typeUser != null) {
       if (nome.isNotEmpty) {
@@ -156,6 +158,7 @@ class _CadastroState extends State<Cadastro> {
             usuario.email = email;
             usuario.password = password;
             usuario.tipo = _typeUser;
+            usuario.cnpj = cnpj;
             _cadastraUsuario(usuario);
           } else {
             setState(() {
@@ -180,6 +183,7 @@ class _CadastroState extends State<Cadastro> {
   }
 
   _cadastraUsuario(Usuario usuario) async {
+    final navigator = Navigator.of(context);
     await _auth
         .createUserWithEmailAndPassword(
             email: usuario.email, password: usuario.password)
@@ -195,13 +199,13 @@ class _CadastroState extends State<Cadastro> {
             .set(usuario.toMap());
         switch (usuario.tipo) {
           case 'empregador':
-            Navigator.pushReplacementNamed(context, Rotas.homeEmpregador,arguments: usuario);
+            navigator.pushNamedAndRemoveUntil(Rotas.homeEmpregador,(context)=>false,arguments: usuario);
             return;
           case 'funcionario':
-            Navigator.pushReplacementNamed(context, Rotas.homeFuncionario);
+            navigator.pushNamedAndRemoveUntil(Rotas.homeFuncionario,(context)=>false);
             return;
           case 'procurando_emprego':
-            Navigator.pushReplacementNamed(context, Rotas.homeFilaEspera);
+            navigator.pushNamedAndRemoveUntil(Rotas.homeFilaEspera,(context)=>false);
             return;
         }
       }

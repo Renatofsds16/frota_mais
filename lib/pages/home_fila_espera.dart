@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:frota_mais/models/usuario.dart';
 import 'package:frota_mais/widgets/show_list.dart';
 
+import '../rotas.dart';
 import '../widgets/loading_data.dart';
 
 class HomeFilaEspera extends StatefulWidget {
@@ -66,7 +67,9 @@ class _HomeFilaEsperaState extends State<HomeFilaEspera> {
         break;
     }
   }
-  _exit()async{
+  _exit()async {
+    final navigator = Navigator.of(context);
     await _auth.signOut();
+    navigator.pushNamedAndRemoveUntil(Rotas.login, (context) => false);
   }
 }
